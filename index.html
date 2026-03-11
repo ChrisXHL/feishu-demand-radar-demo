@@ -1,0 +1,389 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>播客嘉宾背景研究自动简报</title>
+  <link href="https://cdn.jsdelivr.net/npm/remixicon@4.1.0/fonts/remixicon.css" rel="stylesheet">
+  <style>
+    :root {
+      --bg:#f5f6f8;
+      --panel:#ffffff;
+      --soft:#f8fafc;
+      --line:#e6eaf0;
+      --text:#1f2329;
+      --muted:#667085;
+      --primary:#242932;
+      --primary-hover:#111418;
+      --blue:#3b82f6;
+      --blue-soft:#eef4ff;
+      --green:#16a34a;
+      --green-soft:#ecfdf3;
+      --orange:#d97706;
+      --orange-soft:#fff7ed;
+      --purple:#7b61ff;
+      --purple-soft:#f4f0ff;
+      --shadow:0 18px 42px rgba(31,35,41,.06);
+    }
+    *{box-sizing:border-box}
+    html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif}
+    button,input,textarea{font:inherit}
+    a{text-decoration:none;color:inherit}
+    .page{max-width:1440px;margin:0 auto;padding:20px 18px 32px}
+    .topbar{display:flex;align-items:center;justify-content:space-between;gap:16px;margin-bottom:16px}
+    .brand{display:flex;align-items:center;gap:12px}
+    .brand-mark{font-weight:800;font-size:28px;display:flex;align-items:center;letter-spacing:-.05em}
+    .brand-mark i{font-size:20px;margin-left:2px}
+    .brand-sub{font-size:13px;color:#8b93a1}
+    .pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;font-size:12px;font-weight:700}
+    .pill.blue{background:var(--blue-soft);color:var(--blue)}
+    .pill.green{background:var(--green-soft);color:var(--green)}
+    .pill.orange{background:var(--orange-soft);color:var(--orange)}
+    .pill.purple{background:var(--purple-soft);color:var(--purple)}
+
+    .hero{background:var(--panel);border:1px solid var(--line);border-radius:26px;box-shadow:var(--shadow);padding:22px 22px 18px;margin-bottom:16px}
+    .hero h1{margin:0 0 8px;font-size:clamp(28px,4vw,40px);line-height:1.04;letter-spacing:-.05em;max-width:12ch}
+    .hero p{margin:0;max-width:72ch;color:var(--muted);font-size:15px;line-height:1.75}
+    .hero-meta{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+    .hero-meta a{display:inline-flex;align-items:center;gap:6px;padding:7px 11px;border-radius:999px;border:1px solid var(--line);background:#fff;font-size:12px;color:#576071}
+
+    .layout{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(260px,.68fr) minmax(340px,.82fr);gap:16px}
+    .panel{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);min-width:0}
+    .panel-inner{padding:18px}
+    .panel-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:14px}
+    .panel-title{margin:0;font-size:17px;letter-spacing:-.02em}
+    .panel-sub{margin-top:6px;font-size:13px;color:var(--muted);line-height:1.6}
+    .btn{border:none;background:var(--primary);color:#fff;border-radius:999px;padding:10px 15px;font-weight:700;cursor:pointer;transition:.18s}
+    .btn:hover{background:var(--primary-hover)}
+    .btn.secondary{background:#fff;color:#475467;border:1px solid var(--line)}
+    .btn.secondary:hover{background:#fafafa}
+    .actions{display:flex;gap:10px;flex-wrap:wrap}
+
+    .transcript-input{width:100%;min-height:110px;border-radius:18px;border:1px solid var(--line);padding:14px;background:#fff;line-height:1.7;color:var(--text);resize:vertical;outline:none;margin-bottom:14px}
+    .transcript-view{padding:16px;border-radius:18px;background:var(--soft);border:1px solid #edf0f4;min-height:420px}
+    .sentence{display:inline;padding:3px 2px;border-radius:8px;line-height:2.05;cursor:pointer;transition:.16s}
+    .sentence:hover{background:#eef4ff}
+    .sentence.claim{background:#f5f3ff}
+    .sentence.active{background:#dbeafe}
+    .hint{font-size:12px;color:#98a2b3;line-height:1.6}
+
+    .claims-list{display:flex;flex-direction:column;gap:10px}
+    .claim-card{padding:14px;border-radius:18px;background:var(--soft);border:1px solid #edf0f4;cursor:pointer;transition:.18s}
+    .claim-card:hover{border-color:#d8e3fb;background:#fbfdff}
+    .claim-card.active{border-color:#b7d0ff;background:#f8fbff;box-shadow:0 0 0 4px rgba(59,130,246,.08)}
+    .claim-text{font-size:14px;font-weight:700;line-height:1.6;margin-bottom:10px}
+    .row{display:flex;flex-wrap:wrap;gap:8px}
+    .empty{padding:16px;border-radius:18px;background:#fafafa;border:1px dashed #d9dee6;color:#98a2b3;font-size:13px;line-height:1.7}
+
+    .focus-box{padding:14px;border-radius:18px;background:var(--soft);border:1px solid #edf0f4;margin-bottom:12px}
+    .focus-box h3{margin:0 0 8px;font-size:14px}
+    .focus-box p{margin:0;font-size:13px;color:var(--muted);line-height:1.7}
+    .source-card{padding:14px;border-radius:18px;background:#fff;border:1px solid #edf0f4;display:flex;flex-direction:column;gap:10px;margin-bottom:10px}
+    .source-top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px}
+    .source-title{font-size:14px;font-weight:700;line-height:1.5}
+    .source-desc{font-size:13px;color:var(--muted);line-height:1.7}
+    .source-link{display:inline-flex;align-items:center;gap:5px;padding:8px 10px;border-radius:12px;background:#fff;border:1px solid var(--line);font-size:12px;color:#475467;white-space:nowrap}
+    .bar{height:6px;border-radius:999px;background:#e8edf5;overflow:hidden}
+    .bar>span{display:block;height:100%;background:linear-gradient(90deg,#7b61ff,#3b82f6)}
+    .score-row{display:flex;align-items:center;gap:10px}
+    .score-row small{font-size:12px;color:#8b93a1}
+    .export-box{padding:14px;border-radius:18px;background:#fff;border:1px solid #edf0f4;margin-top:12px}
+    .export-box h4{margin:0 0 10px;font-size:14px}
+    .export-card{padding:12px 14px;border-radius:14px;background:var(--soft);border:1px solid #edf0f4;font-size:13px;line-height:1.65;margin-top:10px}
+
+    @media (max-width:1180px){
+      .layout{grid-template-columns:1fr 1fr}
+      .panel.span-2{grid-column:1 / -1}
+    }
+    @media (max-width:880px){
+      .layout{grid-template-columns:1fr}
+      .topbar{flex-direction:column;align-items:flex-start}
+      .hero h1{max-width:none}
+    }
+  </style>
+</head>
+<body>
+  <div class="page">
+    <div class="topbar">
+      <div class="brand">
+        <div class="brand-mark">B<i class="ri-voiceprint-line"></i><span style="margin-left:6px">播记</span></div>
+        <div style="width:1px;height:16px;background:#d0d5dd"></div>
+        <div class="brand-sub">为播客创作者而生</div>
+      </div>
+      <span class="pill purple"><i class="ri-flashlight-line"></i> 核查工作台原型</span>
+    </div>
+
+    <section class="hero">
+      <h1>播客嘉宾背景研究自动简报</h1>
+      <p>自动汇总嘉宾公开信息并产出可直接用于访谈准备的结构化简报</p>
+      <div class="hero-meta">
+        <span class="pill blue"><i class="ri-price-tag-3-line"></i> P1</span>
+        <span class="pill orange"><i class="ri-loader-4-line"></i> 待做demo</span>
+        <span class="pill green"><i class="ri-global-line"></i> Reddit</span>
+        <a href="https://www.reddit.com/r/podcasting/" target="_blank"><i class="ri-links-line"></i> 查看来源</a>
+      </div>
+    </section>
+
+    <section class="layout">
+      <section class="panel span-2">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">节目文本与主张定位</h2>
+              <div class="panel-sub">先把逐字稿贴进来，再从原文中定位哪些句子值得核查。这里不追求自动判断真伪，只追求让编辑更快进入复核。</div>
+            </div>
+            <div class="actions">
+              <button class="btn secondary" id="fillDemoBtn">填充示例</button>
+              <button class="btn" id="analyzeBtn">开始分析</button>
+            </div>
+          </div>
+          <textarea id="transcriptInput" class="transcript-input" placeholder="例如：嘉宾表示 2025 年 AI Agent 市场规模会翻三倍；主持人随后提到开源方案已经在企业端大规模落地……"></textarea>
+          <div class="transcript-view" id="transcriptView">
+            <div class="empty">分析后，这里会按原文上下文展示句子；被识别为值得核查的主张会被高亮。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">主张队列</h2>
+              <div class="panel-sub" id="stats">尚未开始分析</div>
+            </div>
+          </div>
+          <div class="claims-list" id="claimsList">
+            <div class="empty">系统会把值得核查的句子收敛成一个精简队列，帮助编辑先看最重要的项。</div>
+          </div>
+        </div>
+      </section>
+
+      <section class="panel">
+        <div class="panel-inner">
+          <div class="panel-head">
+            <div>
+              <h2 class="panel-title">证据检查与引用卡片</h2>
+              <div class="panel-sub">查看候选来源，决定是否采纳，并导出成引用卡片。</div>
+            </div>
+            <div class="actions">
+              <button class="btn secondary" id="clearBtn">清空</button>
+              <button class="btn secondary" id="exportBtn">导出卡片</button>
+            </div>
+          </div>
+          <div id="evidencePane">
+            <div class="empty">选择一条主张后，这里会显示它的候选来源与可导出的引用卡片。</div>
+          </div>
+        </div>
+      </section>
+    </section>
+  </div>
+
+<script>
+const DEMO_SOURCES = [{"title": "核心来源", "url": "https://www.reddit.com/r/podcasting/", "layer": "方案证据", "desc": "自动汇总嘉宾公开信息并产出可直接用于访谈准备的结构化简报"}, {"title": "用户线索", "url": "https://www.reddit.com/r/podcasting/", "layer": "用户证据", "desc": "播客创作者在邀约到录制之间时间短，人工搜集嘉宾资料耗时且易遗漏。"}, {"title": "可行性参考", "url": "https://www.reddit.com/r/podcasting/", "layer": "基础设施证据", "desc": "输入嘉宾姓名与节目主题，生成背景卡片、近期观点、可追问问题清单，并导出访谈准备简报"}];
+const DEFAULT_TEXT = "嘉宾表示，2025 年 AI Agent 市场规模会翻三倍。\n主持人随后提到，开源方案已经在企业端大规模落地。\n嘉宾还指出，未来一年会有更多团队把 Agent 直接接入内容工作流。";
+
+function escapeHtml(text){
+  return String(text).replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
+}
+function splitSentences(text){
+  return text.split(/[
+。！？!?]/).map(s=>s.trim()).filter(Boolean);
+}
+function looksLikeClaim(sentence){
+  const kws=['表示','认为','指出','提到','数据显示','报告','趋势','增长','下降','市场','用户','机构','已经','将会','会','不会','翻','倍'];
+  return sentence.length>=16 && kws.some(k=>sentence.includes(k));
+}
+function inferType(sentence){
+  if (/(数据|市场|增长|下降|倍|规模)/.test(sentence)) return '数据判断';
+  if (/(机构|报告|研究|官方)/.test(sentence)) return '机构引用';
+  if (/(未来|趋势|将会|会|不会)/.test(sentence)) return '趋势判断';
+  return '事实主张';
+}
+function score(sentence, idx){
+  return Math.min(92, 70 + (sentence.length % 12) + idx * 4);
+}
+function status(score){
+  if(score>=84) return '优先核查';
+  if(score>=76) return '建议核查';
+  return '人工确认';
+}
+function pillClass(value){
+  if(/优先|matched/.test(value)) return 'green';
+  if(/建议|数据|机构|candidate/.test(value)) return 'blue';
+  if(/人工|趋势|needs/.test(value)) return 'orange';
+  return 'purple';
+}
+function buildState(text){
+  const sentences = splitSentences(text);
+  const claims = [];
+  const annotated = sentences.map((sentence, idx)=>{
+    const claimLike = looksLikeClaim(sentence);
+    if(claimLike){
+      claims.push({
+        id:'claim-'+claims.length,
+        sentenceIndex: idx,
+        text: sentence,
+        type: inferType(sentence),
+        score: score(sentence, claims.length),
+      });
+    }
+    return { text: sentence, claimLike, sentenceIndex: idx };
+  });
+  claims.forEach((c, idx)=>{
+    c.status = status(c.score);
+    c.evidence = DEMO_SOURCES.map((src, sidx)=>(
+      {
+        title:src.title,
+        url:src.url,
+        layer:src.layer,
+        desc:src.desc,
+        score:Math.max(60, Math.min(94, c.score - sidx*8)),
+        state:sidx===0?'matched':(sidx===1?'candidate':'needs_manual_review')
+      }
+    )).slice(0,3);
+  });
+  return { annotated, claims };
+}
+function renderTranscript(state, activeId){
+  const wrap=document.getElementById('transcriptView');
+  if(!state.annotated.length){
+    wrap.innerHTML='<div class="empty">分析后，这里会按原文上下文展示句子；被识别为值得核查的主张会被高亮。</div>';
+    return;
+  }
+  wrap.innerHTML = state.annotated.map(item=>{
+    const claim = state.claims.find(c=>c.sentenceIndex===item.sentenceIndex);
+    const cls = ['sentence'];
+    if(item.claimLike) cls.push('claim');
+    if(claim && claim.id===activeId) cls.push('active');
+    return `<span class="${cls.join(' ')}" data-sentence-index="${item.sentenceIndex}">${escapeHtml(item.text)}。</span> `;
+  }).join('');
+  wrap.querySelectorAll('.sentence.claim').forEach(el=>{
+    el.addEventListener('click',()=>{
+      const idx = Number(el.dataset.sentenceIndex);
+      const claim = state.claims.find(c=>c.sentenceIndex===idx);
+      if(claim) setActiveClaim(claim.id);
+    });
+  });
+}
+function renderClaims(state, activeId){
+  const wrap=document.getElementById('claimsList');
+  const stats=document.getElementById('stats');
+  if(!state.claims.length){
+    wrap.innerHTML='<div class="empty">没有识别到足够明确的事实主张。你可以贴入更完整的节目片段。</div>';
+    stats.textContent='未识别到可优先核查主张';
+    return;
+  }
+  stats.textContent=`已识别 ${state.claims.length} 条主张，点击其中一条查看候选来源`;
+  wrap.innerHTML=state.claims.map(claim=>`
+    <article class="claim-card ${claim.id===activeId?'active':''}" data-id="${claim.id}">
+      <div class="claim-text">${escapeHtml(claim.text)}</div>
+      <div class="row">
+        <span class="pill ${pillClass(claim.type)}">${claim.type}</span>
+        <span class="pill ${pillClass(claim.status)}">${claim.status}</span>
+      </div>
+    </article>
+  `).join('');
+  wrap.querySelectorAll('.claim-card').forEach(card=>{
+    card.addEventListener('click',()=> setActiveClaim(card.dataset.id));
+  });
+}
+function renderEvidence(state, activeId){
+  const wrap=document.getElementById('evidencePane');
+  const claim = state.claims.find(c=>c.id===activeId);
+  if(!claim){
+    wrap.innerHTML='<div class="empty">选择一条主张后，这里会显示它的候选来源与可导出的引用卡片。</div>';
+    return;
+  }
+  wrap.innerHTML=`
+    <div class="focus-box">
+      <h3>当前正在复核的主张</h3>
+      <p>${escapeHtml(claim.text)}</p>
+    </div>
+    ${claim.evidence.map(item=>`
+      <article class="source-card">
+        <div class="source-top">
+          <div>
+            <div class="source-title">${escapeHtml(item.title)}</div>
+            <div class="row" style="margin-top:8px">
+              <span class="pill ${pillClass(item.layer)}">${item.layer}</span>
+              <span class="pill ${pillClass(item.state)}">${item.state}</span>
+            </div>
+          </div>
+          <a class="source-link" href="${item.url}" target="_blank">查看来源 <i class="ri-arrow-right-up-line"></i></a>
+        </div>
+        <div class="source-desc">${escapeHtml(item.desc)}</div>
+        <div class="score-row">
+          <div class="bar" style="flex:1"><span style="width:${item.score}%"></span></div>
+          <small>${item.score}%</small>
+        </div>
+      </article>
+    `).join('')}
+    <div class="export-box">
+      <h4>引用卡片预览</h4>
+      <div class="export-card">
+        <strong>主张：</strong>${escapeHtml(claim.text)}<br>
+        <strong>建议引用：</strong>${escapeHtml(claim.evidence[0]?.title || '待人工确认')}<br>
+        <strong>状态：</strong>${escapeHtml(claim.status)}
+      </div>
+    </div>
+  `;
+}
+function setActiveClaim(id){
+  window.__activeClaimId=id;
+  renderTranscript(window.__state, id);
+  renderClaims(window.__state, id);
+  renderEvidence(window.__state, id);
+}
+function analyze(){
+  const text=document.getElementById('transcriptInput').value.trim();
+  const state=buildState(text);
+  window.__state=state;
+  const first=state.claims[0]?.id || '';
+  setActiveClaim(first);
+}
+function exportMarkdown(){
+  const state=window.__state;
+  if(!state || !state.claims.length){ alert('请先分析一段节目文本'); return; }
+  let md=`# 播客嘉宾背景研究自动简报 · 引用卡片
+
+`;
+  state.claims.forEach((claim,idx)=>{
+    md+=`## 主张 ${idx+1}
+${claim.text}
+
+`;
+    claim.evidence.forEach((ev,i)=>{
+      md+=`- 来源 ${i+1}: [${ev.title}](${ev.url}) ｜ ${ev.layer} ｜ ${ev.state}
+`;
+    });
+    md+='
+';
+  });
+  const blob=new Blob([md], {type:'text/markdown;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download='boji-factcheck-cards.md';
+  a.click();
+  URL.revokeObjectURL(a.href);
+}
+function clearAll(){
+  document.getElementById('transcriptInput').value='';
+  window.__state={annotated:[],claims:[]};
+  window.__activeClaimId='';
+  document.getElementById('stats').textContent='尚未开始分析';
+  renderTranscript(window.__state, '');
+  renderClaims(window.__state, '');
+  renderEvidence(window.__state, '');
+}
+function fillDemo(){
+  document.getElementById('transcriptInput').value=DEFAULT_TEXT;
+  analyze();
+}
+document.getElementById('fillDemoBtn').addEventListener('click', fillDemo);
+document.getElementById('analyzeBtn').addEventListener('click', analyze);
+document.getElementById('clearBtn').addEventListener('click', clearAll);
+document.getElementById('exportBtn').addEventListener('click', exportMarkdown);
+fillDemo();
+</script>
+</body>
+</html>
